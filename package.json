@@ -1,0 +1,46 @@
+{
+  "name": "vue-svga",
+  "description": "Svga component for Vue",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:JayZangwill/vue-svga.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JayZangwill/vue-svga/issues"
+  },
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "homepage": "https://github.com/JayZangwill/vue-svga#readme",
+  "author": "Jay Zangwill",
+  "license": "MIT",
+  "keywords": [
+    "vue-svga",
+    "vue svga",
+    "svga",
+    "vue"
+  ],
+  "scripts": {
+    "dev": "rollup -w --config rollup.config.js",
+    "prod": "rollup --config rollup.config.js"
+  },
+  "dependencies": {
+    "svga.lite": "^1.2.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.6",
+    "@babel/plugin-transform-classes": "^7.8.6",
+    "@babel/preset-env": "^7.8.6",
+    "@rollup/plugin-commonjs": "^11.0.2",
+    "@rollup/plugin-node-resolve": "^7.1.1",
+    "rollup": "^1.32.0",
+    "rollup-plugin-babel": "^4.3.3",
+    "rollup-plugin-terser": "^5.2.0",
+    "rollup-plugin-vue": "^5.1.6",
+    "vue": "^2.6.11",
+    "vue-template-compiler": "^2.6.11"
+  }
+}
