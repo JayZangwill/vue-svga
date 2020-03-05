@@ -3,57 +3,44 @@
 </template>
 
 <script>
-// https://github.com/svga/SVGAPlayer-Web-Lite
 import { Downloader, Parser, Player } from 'svga.lite'
 const downloader = new Downloader()
-async function parseSvgaData(src) {
-  const parser = new Parser()
-  const rawData = await downloader.get(src)
-  return await parser.do(rawData)
-}
+const parser = new Parser()
+
 export default {
+  name: 'svga',
   props: {
-    loop: {
-      type: Number,
-      default: 0,
-    },
-    autoPlay: {
-      type: Boolean,
-      default: true,
-    },
-    fillMode: {
-      type: String,
-      default: 'forwards',
-    },
     src: {
       type: String,
       required: true,
     },
-    play: {
-      type: Boolean,
-      default: false,
+    options: {
+      type: Object,
+      default: () => ({}),
     },
   },
   data() {
     return {
+      parser,
       player: null,
       canplay: false,  
       needPlay: false,
     }
   },
-  watch: {
-    play(val) {
-      val ? this.start() : this.pause()
-    },
-  },
   async mounted() {
     const player = this.player = new Player(this.$el)
+    const { loop = 0, fillMode = 'forwards', playMode = 'forwards', startFrame = 0, endFrame = 0, autoPlay = true } = this.options
+
     player.set({
-      loop: this.loop,
-      fillMode: this.fillMode,
+      loop,
+      fillMode,
+      playMode,
+      startFrame,
+      endFrame,
     })
-    const data = await parseSvgaData(this.src)
+    const data = await this.parseSvgaData(this.src)
     await player.mount(data)
+    // 当调用播放时，避免因资源加载过慢而不能播放
     this.canplay = true
     if (this.needPlay) {
       this.player.start()
@@ -66,16 +53,18 @@ export default {
       .$on('end', () => this.$emit('end'))
       .$on('clear', () => this.$emit('clear'))
       .$on('process', () => this.$emit('process', player.progress))
-    this.autoPlay && player.start()
+      autoPlay && player.start()
   },
   methods: {
     start() {
-      if (this.player) {
-        if (this.canplay) {
-          this.player.start()
-        } else {
-          this.needPlay = true
-        }
+      if (!this.player) {
+        return
+      }
+
+      if (this.canplay) {
+        this.player.start()
+      } else {
+        this.needPlay = true
       }
     },
     pause() {
@@ -89,6 +78,10 @@ export default {
         this.player.clear()
         this.player = null
       }
+    },
+    async parseSvgaData(src) {
+      const rawData = await downloader.get(src)
+      return await parser.do(rawData)
     },
   },
   beforeDestroy() {
