@@ -4,5 +4,14 @@
       "loose":false,
       "modules": false
     }]
-  ]
+  ],
+  "plugins": [
+    [
+      "@babel/transform-runtime",
+      {
+        "helpers": false,
+        "useESModules": true
+      }
+    ]]
+    
 }
