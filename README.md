@@ -44,3 +44,47 @@ Vue.use(svga)
 <svga :src="require('test.svga')" />
 ```
 
+### 使用options参数
+
+```html
+<svga :src="require('test.svga')" :options="options">
+```
+
+```javascript
+export default {
+  data() {
+    return {
+      options: {
+        loop = 0,
+        fillMode = 'forwards',
+        playMode = 'forwards',
+        startFrame = 0,
+        endFrame = 0,
+        autoPlay = true
+      }
+    }
+  }
+}
+```
+
+## 提供的方法
+
+属性名 |  说明
+-|-|-
+start | 播放svga
+pause | 暂停svga
+stop | 停止svga
+clear | 清空画布
+
+### 使用示例
+
+```html
+<svga :src="require('test.svga')" ref="svga">
+```
+
+```javascript
+this.$refs.svga.start() // 开始播放
+this.$refs.svga.pause() // 暂停播放
+this.$refs.svga.stop() // 停止播放
+this.$refs.svga.clear() // 清空画布
+```
