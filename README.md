@@ -88,3 +88,13 @@ this.$refs.svga.pause() // 暂停播放
 this.$refs.svga.stop() // 停止播放
 this.$refs.svga.clear() // 清空画布
 ```
+
+## 事件
+
+与[文档](https://github.com/svga/SVGAPlayer-Web-Lite/blob/master/README.zh-CN.md#%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8)保持一致
+
+### 示例
+
+```html
+<svga :src="require('test.svga')" @start="start">
+```

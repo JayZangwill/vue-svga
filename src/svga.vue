@@ -23,13 +23,13 @@ export default {
     return {
       parser,
       player: null,
-      canplay: false,  
-      needPlay: false,
+      svgaData: null,
+      isMount: false,
     }
   },
   async mounted() {
     const player = this.player = new Player(this.$el)
-    const { loop = 0, fillMode = 'forwards', playMode = 'forwards', startFrame = 0, endFrame = 0, autoPlay = true } = this.options
+    const { loop = 0, fillMode = 'forwards', playMode = 'forwards', startFrame = 0, endFrame = 0, autoPlay = true, autoMount = true } = this.options
 
     player.set({
       loop,
@@ -38,13 +38,8 @@ export default {
       startFrame,
       endFrame,
     })
-    const data = await this.parseSvgaData(this.src)
-    await player.mount(data)
-    // 当调用播放时，避免因资源加载过慢而不能播放
-    this.canplay = true
-    if (this.needPlay) {
-      this.player.start()
-    }
+    this.svgaData = await this.parseSvgaData(this.src)
+
     // 事件回调
     player
       .$on('start', () => this.$emit('start'))
@@ -53,7 +48,10 @@ export default {
       .$on('end', () => this.$emit('end'))
       .$on('clear', () => this.$emit('clear'))
       .$on('process', () => this.$emit('process', player.progress))
-      autoPlay && player.start()
+
+    if (autoMount) {
+      await this.mount(this.svgaData)
+    }
   },
   methods: {
     start() {
@@ -61,11 +59,7 @@ export default {
         return
       }
 
-      if (this.canplay) {
-        this.player.start()
-      } else {
-        this.needPlay = true
-      }
+      this.player.start()
     },
     pause() {
       if (this.player) this.player.pause()
@@ -76,8 +70,15 @@ export default {
     clear() {
       if (this.player) {
         this.player.clear()
-        this.player = null
+        this.player = this.svgaData = null
       }
+    },
+    async mount() {
+      const result = await this.player.mount(this.svgaData)
+      this.isMount = true
+      this.player.start()
+
+      return result
     },
     async parseSvgaData(src) {
       const rawData = await downloader.get(src)
