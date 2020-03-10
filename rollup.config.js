@@ -15,7 +15,11 @@ export default [
       },
     ],
     plugins: [
-      VuePlugin (),
+      VuePlugin ({
+        template: {
+          isProduction: true
+        }
+      }),
       resolve ({
         modulesOnly: true,
         extensions: ['.js', '.vue']
