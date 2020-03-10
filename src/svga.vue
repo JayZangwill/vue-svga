@@ -5,7 +5,6 @@
 <script>
 import { Downloader, Parser, Player } from 'svga.lite'
 const downloader = new Downloader()
-const parser = new Parser()
 
 export default {
   name: 'svga',
@@ -21,10 +20,14 @@ export default {
   },
   data() {
     return {
-      parser,
+      parser: null,
       player: null,
       svgaData: null,
       isMount: false,
+      canPlay: false,
+      needPlay: false,
+      parseEnd: false,
+      canMount: false,
     }
   },
   async mounted() {
@@ -39,6 +42,9 @@ export default {
       endFrame,
     })
     this.svgaData = await this.parseSvgaData(this.src)
+    this.$emit('parsed')
+    this.parseEnd = true
+    this.needMount && this.mount()
 
     // 事件回调
     player
@@ -50,7 +56,15 @@ export default {
       .$on('process', () => this.$emit('process', player.progress))
 
     if (autoMount) {
-      await this.mount(this.svgaData)
+      await this.mount(autoPlay)
+      this.canPlay = true
+
+      // 如果start函数在mount结束前被调用，待绑定完成后直接播放
+      if (this.needPlay) {
+        this.start()
+      }
+    } else if (autoPlay) {
+      this.start()
     }
   },
   methods: {
@@ -59,7 +73,12 @@ export default {
         return
       }
 
-      this.player.start()
+      if (this.canPlay) {
+        this.player.start()
+      } else {
+        this.needPlay = true
+      }
+
     },
     pause() {
       if (this.player) this.player.pause()
@@ -73,14 +92,22 @@ export default {
         this.player = this.svgaData = null
       }
     },
-    async mount() {
-      const result = await this.player.mount(this.svgaData)
-      this.isMount = true
-      this.player.start()
+    async mount(autoPlay) {
+      let result
+      if (this.parseEnd) {
+        result = await this.player.mount(this.svgaData)
+        this.canPlay = this.isMount = true
+        if (this.needPlay || autoPlay) {
+          this.player.start()
+        }
+      } else {
+        this.needMount = true
+      }
 
       return result
     },
     async parseSvgaData(src) {
+      const parser = this.parser = new Parser()
       const rawData = await downloader.get(src)
       return await parser.do(rawData)
     },

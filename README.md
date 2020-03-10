@@ -93,8 +93,45 @@ this.$refs.svga.clear() // 清空画布
 
 与[文档](https://github.com/svga/SVGAPlayer-Web-Lite/blob/master/README.zh-CN.md#%E7%AE%80%E5%8D%95%E4%BD%BF%E7%94%A8)保持一致
 
+除此之外还提供了`parsed`事件，svga文件解析完毕后会立刻触发
+
 ### 示例
 
 ```html
 <svga :src="require('test.svga')" @start="start">
+```
+
+## 替换元素&动态元素
+
+你可以像[官方文档](https://github.com/svga/SVGAPlayer-Web-Lite/blob/master/README.zh-CN.md#%E6%9B%BF%E6%8D%A2%E5%85%83%E7%B4%A0)一样使用替换元素&动态元素，**不过需要注意的是你需要在`parsed`事件触发后才能操作`svgaData`，同时autoPlay和autoMount属性都要设置为false：**
+
+```html
+<svga :src="require('test.svga')" @parsed="parsed" ref="svga" />
+```
+
+```javascript
+export default {
+  data() {
+    return {
+      options: {
+        autoMount: false,
+        autoPlay: false
+      }
+    }
+  },
+  methods: {
+    async parsed() {
+      const svga = this.$refs.svga
+
+      const image = new Image()
+      image.src = 'https://xxx.com/xxx.png'
+
+      svga.svgaData.images['key'] = image
+
+      await svga.mount()
+
+      svga.start()
+    }
+  }
+}
 ```
